@@ -1,0 +1,3 @@
+class NotificationData < ApplicationRecord
+
+end

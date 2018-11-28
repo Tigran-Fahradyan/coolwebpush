@@ -1,0 +1,83 @@
+$(document).ready(function(){
+    $("#sendPush").on("click", function() {
+    checkNotifs();
+    });
+
+    $('#unregisterSW').on('click', function() {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister()
+            }
+        });
+    });
+});
+
+function checkNotifs(obj){
+    if (!("Notification" in window)) {
+        console.error("This browser does not support desktop notification");
+    }
+    // Let's check whether notification permissions have already been granted
+    else if (Notification.permission === "granted") {
+        getKeys();
+    }
+    // Otherwise, we need to ask the user for permission
+    else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+            // If the user accepts, let's create a notification
+            if (permission === "granted") {
+                console.log("Permission to receive notifications has been granted");
+                getKeys();
+            }
+        });
+    } else {
+        console.log("Permission to receive notifications has been denied");
+    }
+}
+
+function getVapidKey() {
+    var vapidPublicKey = false;
+    $.ajax({
+        type: "POST",
+        url: '/provide-vapid-key',
+        data: {},
+        async: false,
+        success: function(res){
+            if (res.status) {
+                vapidPublicKey = new Uint8Array(res.data);
+            }
+        },
+        dataType: 'json'
+    });
+    return vapidPublicKey;
+}
+
+function getKeys(){
+    var vapidPublicKey = getVapidKey();
+    if (!vapidPublicKey) {
+        alert('can not get vapid key !!!');
+        return false;
+    }
+
+    // Get subscription
+    navigator.serviceWorker.register('/serviceworker.js', {scope: './'}).then(function(registration) {
+        // Get current subscription
+        return registration.pushManager.getSubscription().then(function(subscription) {
+            if (subscription) {
+                return subscription;
+            }
+            // Subscribe if subscription does not exist
+            return registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: vapidPublicKey
+            });
+        });
+    }).then(function(subscription) {
+        sendNotification(subscription.toJSON());
+    });
+}
+
+function sendNotification(subscription){
+    $.post('/sendNotification', {
+        subscription: subscription
+    });
+}
