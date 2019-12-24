@@ -15,5 +15,4 @@
 //= require activestorage
 //= require turbolinks
 //= require_tree .
-//= require serviceworker-companion
-///= require_tree//= require serviceworker-companion
+

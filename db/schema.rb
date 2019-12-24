@@ -20,12 +20,6 @@ ActiveRecord::Schema.define(version: 2018_11_26_065421) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "subscriptions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin", force: :cascade do |t|
-    t.text "subscription"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin", force: :cascade do |t|
     t.integer "notif_id"
     t.string "name"

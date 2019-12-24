@@ -23,6 +23,18 @@
 /public/assets
 .byebug_history
 /.idea/*
+/.sass-cache
+/.env
+yarn
+rvmrc
+/.config
+/coverage/
+/.yardoc/
+/_yardoc/
+/rdoc/
+/.bundle/
+/vendor/bundle
+/lib/bundler/man/
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key

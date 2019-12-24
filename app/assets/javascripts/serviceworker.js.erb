@@ -1,35 +1,38 @@
-// chrome://serviceworker-internals/
-
+// the chrome url of service workers =  chrome://serviceworker-internals/
 self.addEventListener("push", function(event) {
 //    var title = (event.data && event.data.text().split("-")[0]) || "Some Message from Tigran";
-    var title = "Message from Tigran";
-//    var body; body = event.data.text().split("-")[1];
-    var body = "Hi All!";
-    var tag = "tag";
-    var icon = 'logo.png';
+    const data = event.data.text();
+    const pushData = JSON.parse(event.data.text());
 
     event.waitUntil(
-        self.registration.showNotification(title, {
-            body: body,
-            icon: icon,
-            tag: tag
+        self.registration.showNotification(pushData.message, {
+            body: 'Hi All!, This is a body text.',
+            dir: 'auto', // String of 'auto' | 'ltr' | 'rtl'
+            lang: 'en',
+            requireInteraction: true, // notification should remain active until the user clicks or dismisses it
+            icon: 'logo.png',
+            tag: 'An ID for a given notification that allows you to find, replace, or remove the notification using a script if necessary',
+//            vibrate: [300, 100, 400], // would vibrate 300ms, pause 100ms, then vibrate 400ms.
+            data: data
         })
     );
 });
 
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
-    var url = "/";
-    event.waitUntil( clients.matchAll({type: 'window'}).then( function(windowClients) {
-            for (var i = 0; i < windowClients.length; i++) {
-                var client = windowClients[i];
-                if (client.url === url && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow(url);
-            }
-        })
-    );
+//    const data = JSON.parse(event.notification.data);
+//    const url = data.redirect;
+
+//    event.waitUntil( clients.matchAll({type: 'window'}).then( function(windowClients) {
+//            for (var i = 0; i < windowClients.length; i++) {
+//                var client = windowClients[i];
+//                if (client.url === url && 'focus' in client) {
+//                    return client.focus();
+//                }
+//            }
+//            if (clients.openWindow) {
+//                return clients.openWindow(url);
+//            }
+//        })
+//    );
 });

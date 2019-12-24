@@ -4,6 +4,8 @@ class NotificationController < ApplicationController
   end
 
   def get_vapid_keys
+    abort "really?".inspect
+
     # save the keys in env file
     require 'webpush'
     vapid_key = Webpush.generate_key
@@ -15,6 +17,7 @@ class NotificationController < ApplicationController
   end
 
   def sendPush
+    # abort (root_path+"web_push_files/plucky_notification.mp3").inspect
     # destroy all users that has the same auth token
     User.where(auth_key: params[:subscription][:keys][:auth]).destroy_all
 
@@ -35,19 +38,27 @@ class NotificationController < ApplicationController
     render body: nil
   end
 
+  def provide_vapid_key
+    status = ENV['VAPID_PUBLIC_KEY'].length > 0 ? true : false
+    data = Base64.urlsafe_decode64(ENV['VAPID_PUBLIC_KEY']).bytes
+    return render json: {status: status, data: data}
+  end
+
+  private
+
   def sendPayload(user, notif_data)
     if user.notif_id.present?
       Webpush.payload_send(
-          endpoint: notif_data.endpoint,
           message: get_message,
+          endpoint: notif_data.endpoint,
           p256dh: notif_data.p256dh_key,
           auth: notif_data.auth_key,
-          ttl: 24 * 60 * 60,
           vapid: {
-              subject: ENV['VAOID_SUBJECT'],
+              subject: ENV['VAPID_SUBJECT'],
               public_key: ENV['VAPID_PUBLIC_KEY'],
               private_key: ENV['VAPID_PRIVATE_KEY']
-          }
+          },
+          ttl: 24 * 60 * 60
       )
       puts "success"
     else
@@ -56,13 +67,10 @@ class NotificationController < ApplicationController
   end
 
   def get_message()
-    "Hello World"
-  end
-
-  def provide_vapid_key
-    status = ENV['VAPID_PUBLIC_KEY'].length > 0 ? true : false
-    data = Base64.urlsafe_decode64(ENV['VAPID_PUBLIC_KEY']).bytes
-    return render json: {status: status, data: data}
+    message = Hash.new
+    message[:message] = "Message from Tigran"
+    message[:redirect] = "/"
+    message.to_json
   end
 
 end
